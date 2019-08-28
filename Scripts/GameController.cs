@@ -22,7 +22,7 @@ public class GameController : MonoBehaviour
             }
         }
     }
-    public CanvasGroup menuGroup, pauseGroup;
+    public CanvasGroup menuGroup, instructionGroup;
     public SpriteRenderer border;
     public Text scoreText;
 
@@ -40,8 +40,13 @@ public class GameController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        GameRunning = false;
         SetBorder();
-        pauseGroup.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = "Start";
+        menuGroup.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = "Start";
+#if UNITY_WEBGL
+        menuGroup.transform.GetChild(2).GetChild(0).GetComponent<Text>().text = "Restart";
+        menuGroup.transform.GetChild(2).gameObject.SetActive(false);
+#endif
     }
 
     // Update is called once per frame
@@ -77,9 +82,9 @@ public class GameController : MonoBehaviour
     public void PlayPause()
     {
         Debug.Log("Call: " + GameRunning);
-        if (pauseGroup.transform.GetChild(0).GetChild(0).GetComponent<Text>().text.Equals("Start"))
+        if (menuGroup.transform.GetChild(0).GetChild(0).GetComponent<Text>().text.Equals("Start"))
         {
-            pauseGroup.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = "Resume";
+            menuGroup.transform.GetChild(0).GetChild(0).GetComponent<Text>().text = "Resume";
         }
         if (!GameRunning)
         {
@@ -87,10 +92,6 @@ public class GameController : MonoBehaviour
             menuGroup.alpha = 0;
             menuGroup.blocksRaycasts = false;
             menuGroup.interactable = false;
-
-            pauseGroup.alpha = 0;
-            pauseGroup.blocksRaycasts = false;
-            pauseGroup.interactable = false;
         }
         else
         {
@@ -98,37 +99,47 @@ public class GameController : MonoBehaviour
             menuGroup.alpha = 1;
             menuGroup.blocksRaycasts = true;
             menuGroup.interactable = true;
-
-            pauseGroup.alpha = 1;
-            pauseGroup.blocksRaycasts = true;
-            pauseGroup.interactable = true;
         }
-        Debug.Log("Termination: " + GameRunning);
     }
 
     public void RestartQuit()
     {
+        GameObject.Find("CaptureButton").GetComponent<Button>().interactable = false;
+        menuGroup.transform.GetChild(0).gameObject.SetActive(false);
+
+#if UNITY_WEBGL
+        menuGroup.transform.GetChild(2).gameObject.SetActive(true);
+#endif
         menuGroup.alpha = 1;
         menuGroup.blocksRaycasts = true;
         menuGroup.interactable = true;
+    }
 
-        pauseGroup.alpha = 1;
-        pauseGroup.blocksRaycasts = true;
-        pauseGroup.interactable = true;
-
-        pauseGroup.transform.GetChild(0).gameObject.SetActive(false);
+    public void ToggleInstructionGroup(bool value)
+    {
+        if (value)
+        {
+            instructionGroup.alpha = 1;
+            instructionGroup.blocksRaycasts = true;
+            instructionGroup.interactable = true;
+        }
+        else
+        {
+            instructionGroup.alpha = 0;
+            instructionGroup.blocksRaycasts = false;
+            instructionGroup.interactable = false;
+        }
     }
 
     public void GameOver()
     {
-        Debug.LogWarning("Game Ending");
         gameRunning = false;
         RestartQuit();
     }
 
     public void Quit()
     {
-#if UNITY_STANDALONE_WIN
+#if UNITY_STANDALONE_WIN || UNITY_EDITOR
         Application.Quit();
         return;
 #endif

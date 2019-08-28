@@ -105,7 +105,13 @@ public class BeamController : MonoBehaviour
         if (consecutiveScores == 5)
         {
             consecutiveScores = 0;
-            if (lifeCount < 2) { lifeCount++; }
+            if (lifeCount < 2)
+            {
+                lifeCount++;
+                var color = lives[lifeCount].color;
+                color.a = 1;
+                lives[lifeCount].color = color;
+            }
         }
     }
 }
